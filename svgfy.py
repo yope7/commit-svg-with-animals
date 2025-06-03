@@ -3,11 +3,38 @@ from datetime import datetime, timedelta
 import random
 import calendar
 import os
+import subprocess
 from dotenv import load_dotenv
 
 load_dotenv()
 
-USERNAME = "yope7"
+# Gitからユーザー情報を取得
+def get_git_username():
+    try:
+        # gitコマンドからユーザー名を取得
+        git_username = subprocess.check_output(
+            ["git", "config", "user.name"], 
+            stderr=subprocess.STDOUT,
+            universal_newlines=True
+        ).strip()
+        return git_username
+    except subprocess.CalledProcessError:
+        return None
+
+def get_git_email():
+    try:
+        # gitコマンドからメールアドレスを取得
+        git_email = subprocess.check_output(
+            ["git", "config", "user.email"], 
+            stderr=subprocess.STDOUT,
+            universal_newlines=True
+        ).strip()
+        return git_email
+    except subprocess.CalledProcessError:
+        return None
+
+# GitHubユーザー名の取得（環境変数 > gitコンフィグ > デフォルト値）
+USERNAME = os.getenv("GITHUB_USERNAME") or get_git_username()
 TOKEN = os.getenv("TOKEN")
 
 # 動物の種類と絵文字を定義
@@ -94,12 +121,15 @@ def get_color(count):
 month_names = {i: name for i, name in enumerate(calendar.month_abbr) if i != 0}
 
 # 出力ディレクトリの確認と作成
-# output_dir = ""
-# if not os.path.exists(output_dir):
-#     os.makedirs(output_dir)
+output_dir = os.getenv("OUTPUT_DIR", "")
+output_file = os.getenv("OUTPUT_FILE", "output.svg")
+output_path = os.path.join(output_dir, output_file) if output_dir else output_file
+
+if output_dir and not os.path.exists(output_dir):
+    os.makedirs(output_dir)
 
 # SVG出力
-with open("output.svg", "w") as f:
+with open(output_path, "w") as f:
     # SVGヘッダーとスタイル
     f.write(f'''<svg width="{width}" height="{height + 20}" xmlns="http://www.w3.org/2000/svg">
   <style>

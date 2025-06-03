@@ -2,11 +2,16 @@ name: Generate SVG and deploy
 
 on:
   schedule:
-    - cron: "0 0 * * *"  # 毎日0:00 UTC
+    - cron: "0 0 * * *" # 毎日0:00 UTC
   workflow_dispatch: # 手動実行も可
   push:
     branches:
       - main
+
+env:
+  OUTPUT_FILE: output.svg
+  TARGET_BRANCH: output
+  TARGET_REPO: ${{ github.repository_owner }}/${{ github.repository_owner }}
 
 jobs:
   build:
@@ -30,8 +35,9 @@ jobs:
         run: python svgfy.py
         env:
           TOKEN: ${{ secrets.PUSH_TOKEN }}
+          GITHUB_USERNAME: ${{ github.repository_owner }}
 
-      - name: Push to yope7/yope7 repository
+      - name: Push to target repository
         run: |
           # SVGファイルが存在することを確認
           if [ -f "output.svg" ]; then
@@ -40,7 +46,7 @@ jobs:
             cd /tmp/output-repo
             
             # 対象リポジトリをクローン
-            git clone https://x-access-token:${{ secrets.PUSH_TOKEN }}@github.com/yope7/yope7.git .
+            git clone https://x-access-token:${{ secrets.PUSH_TOKEN }}@github.com/${{ env.TARGET_REPO }}.git .
             
             # outputブランチが存在しない場合は作成
             git checkout output 2>/dev/null || git checkout -b output
@@ -54,8 +60,8 @@ jobs:
             git add output.svg
             git commit -m "Update SVG from workflow run" || echo "No changes to commit"
             
-            # outputブランチにプッシュ
-            git push origin output
+            # 対象ブランチにプッシュ
+            git push origin ${{ env.TARGET_BRANCH }}
           else
             echo "SVGファイルが見つかりません"
             exit 1
