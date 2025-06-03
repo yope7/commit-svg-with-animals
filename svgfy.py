@@ -94,12 +94,12 @@ def get_color(count):
 month_names = {i: name for i, name in enumerate(calendar.month_abbr) if i != 0}
 
 # 出力ディレクトリの確認と作成
-output_dir = "./dist"
-if not os.path.exists(output_dir):
-    os.makedirs(output_dir)
+# output_dir = ""
+# if not os.path.exists(output_dir):
+#     os.makedirs(output_dir)
 
 # SVG出力
-with open("./dist/output.svg", "w") as f:
+with open("output.svg", "w") as f:
     # SVGヘッダーとスタイル
     f.write(f'''<svg width="{width}" height="{height + 20}" xmlns="http://www.w3.org/2000/svg">
   <style>
