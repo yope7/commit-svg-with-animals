@@ -1,0 +1,64 @@
+name: Generate SVG and deploy
+
+on:
+  schedule:
+    - cron: "0 0 * * 0" # 毎週日曜0:00 UTC（日本時間で日曜9:00）
+  workflow_dispatch: # 手動実行も可
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt || true  # 必要なら
+
+      - name: Run script
+        run: python svgfy.py
+        env:
+          TOKEN: ${{ secrets.secrets }}
+
+      - name: Push to yope7/yope7 repository
+        run: |
+          # SVGファイルが存在することを確認
+          if [ -f "output.svg" ]; then
+            # 一時ディレクトリを作成
+            mkdir -p /tmp/output-repo
+            cd /tmp/output-repo
+            
+            # 対象リポジトリをクローン
+            git clone https://x-access-token:${{ secrets.PUSH_TOKEN }}@github.com/yope7/yope7.git .
+            
+            # outputブランチが存在しない場合は作成
+            git checkout output 2>/dev/null || git checkout -b output
+            
+            # 元のリポジトリからSVGをコピー
+            cp $GITHUB_WORKSPACE/output.svg .
+            
+            # 変更をコミット
+            git config --local user.email "action@github.com"
+            git config --local user.name "GitHub Action"
+            git add output.svg
+            git commit -m "Update SVG from workflow run" || echo "No changes to commit"
+            
+            # outputブランチにプッシュ
+            git push origin output
+          else
+            echo "SVGファイルが見つかりません"
+            exit 1
+          fi
+        env:
+          PUSH_TOKEN: ${{ secrets.PUSH_TOKEN }}
