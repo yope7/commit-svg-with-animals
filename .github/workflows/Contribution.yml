@@ -29,7 +29,7 @@ jobs:
       - name: Run script
         run: python svgfy.py
         env:
-          TOKEN: ${{ secrets.secrets }}
+          TOKEN: ${{ secrets.PUSH_TOKEN }}
 
       - name: Push to yope7/yope7 repository
         run: |
