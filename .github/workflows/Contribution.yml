@@ -2,7 +2,7 @@ name: Generate SVG and deploy
 
 on:
   schedule:
-    - cron: "0 0 * * 0" # 毎週日曜0:00 UTC（日本時間で日曜9:00）
+    - cron: "0 0 * * *"  # 毎日0:00 UTC
   workflow_dispatch: # 手動実行も可
   push:
     branches:
