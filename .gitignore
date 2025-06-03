@@ -3,7 +3,6 @@ venv/
 .env
 # 出力ファイル
 dist/
-*.svg
 
 # Pythonキャッシュ
 __pycache__/
@@ -13,6 +12,3 @@ __pycache__/
 .DS_Store
 *.swp
 *.swo
-
-# pip freeze 出力
-requirement.txt
